@@ -14,7 +14,7 @@ sudo python3 Beef_Over_Ngrok.py
 
 Open ngrok.yml in Location: .ngrok2/ngrok.yml
 
-```python
+```text
 NGROK Steps :-
 
             STEP 1 : Add these Lines To ngrok.yml [Location .ngrok2/ngrok.yml ]
